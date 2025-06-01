@@ -19,7 +19,9 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
 
-	wxPanel* panel = new wxPanel(this);
+	m_notebook = new wxNotebook(this, wxID_ANY);
+	wxPanel* panel = new wxPanel(m_notebook);  // Timer tab
+
 	wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
 	// Zeitanzeige erstellen
@@ -49,6 +51,8 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	mainSizer->AddStretchSpacer();
 
 	panel->SetSizer(mainSizer);
+	m_notebook->AddPage(panel, "Timer");
+
 
 	// Timer initialisieren
 	m_timer = new wxTimer(this);
