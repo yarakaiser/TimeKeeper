@@ -69,6 +69,32 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	m_windowLogger = new WindowLogger("windowlog.db");
 
 	UpdateDisplay();
+
+	// --- Logs Tab ---
+	m_logPanel = new wxPanel(m_notebook);
+	wxBoxSizer* logSizer = new wxBoxSizer(wxVERTICAL);
+
+	// Date picker
+	m_datePicker = new wxDatePickerCtrl(m_logPanel, wxID_ANY);
+	logSizer->Add(m_datePicker, 0, wxALL | wxEXPAND, 10);
+	m_datePicker->Bind(wxEVT_DATE_CHANGED, &MainFrame::OnDateChanged, this);
+
+	// List view
+	m_logList = new wxListCtrl(m_logPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+	m_logList->InsertColumn(0, "Window Title", wxLIST_FORMAT_LEFT, 300);
+	m_logList->InsertColumn(1, "Time Spent", wxLIST_FORMAT_RIGHT, 100);
+	logSizer->Add(m_logList, 1, wxALL | wxEXPAND, 10);
+
+	m_logPanel->SetSizer(logSizer);
+	m_notebook->AddPage(m_logPanel, "Logs");
+
+	wxBoxSizer* topSizer = new wxBoxSizer(wxVERTICAL);
+	topSizer->Add(m_notebook, 1, wxEXPAND);
+	SetSizerAndFit(topSizer);
+
+	// Load today's logs initially
+	LoadLogsForDate(wxDateTime::Today().FormatISODate());
+
 }
 
 MainFrame::~MainFrame()
@@ -94,10 +120,50 @@ std::string GetActiveWindowTitle() {
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
 {
+	wxDateTime selectedDate = event.GetDate();
+	wxString dateStr = selectedDate.FormatISODate(); // "YYYY-MM-DD"
+	LoadLogsForDate(dateStr);
 }
 
 void MainFrame::LoadLogsForDate(const wxString& date)
 {
+	m_logList->DeleteAllItems();
+
+	sqlite3* db;
+	if (sqlite3_open("windowlog.db", &db) != SQLITE_OK) {
+		wxLogError("Cannot open DB");
+		return;
+	}
+
+	const char* sql = R"(
+        SELECT title, SUM(duration)
+        FROM WindowLog
+        WHERE DATE(start_time) = ?
+        GROUP BY title
+        ORDER BY SUM(duration) DESC;
+    )";
+
+	sqlite3_stmt* stmt;
+	if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, date.mb_str(), -1, SQLITE_STATIC);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW) {
+			std::string title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+			int seconds = sqlite3_column_int(stmt, 1);
+
+			int h = seconds / 3600;
+			int m = (seconds % 3600) / 60;
+			int s = seconds % 60;
+			wxString timeStr = wxString::Format("%02d:%02d:%02d", h, m, s);
+
+			long idx = m_logList->InsertItem(m_logList->GetItemCount(), title);
+			m_logList->SetItem(idx, 1, timeStr);
+		}
+
+		sqlite3_finalize(stmt);
+	}
+
+	sqlite3_close(db);
 }
 
 void MainFrame::OnStart(wxCommandEvent& evt) {
