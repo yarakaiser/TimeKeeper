@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.15)
+project(TimeKeeper)
+
+# C++ standard
+set(CMAKE_CXX_STANDARD 17)
+
+# Find wxWidgets
+find_package(wxWidgets REQUIRED COMPONENTS core base)
+
+# Include wxWidgets settings
+include(${wxWidgets_USE_FILE})
+
+# Add your sources
+add_executable(TimeKeeper WIN32
+    App.cpp
+    MainFrame.cpp
+    WindowLogger.cpp
+    sqlite3.c
+)
+
+# Include directories
+target_include_directories(TimeKeeper PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Link wxWidgets libraries
+target_link_libraries(TimeKeeper
+    ${wxWidgets_LIBRARIES}
+)
+
+

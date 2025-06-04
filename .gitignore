@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 #windowlog.db
 **/windowlog.db
+
+# Cmake
+build/
