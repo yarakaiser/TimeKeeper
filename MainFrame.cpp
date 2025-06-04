@@ -15,9 +15,9 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 {
 	//Maximize(true);
 
-	AllocConsole();
+	/*AllocConsole();
 	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+	freopen("CONOUT$", "w", stderr);*/
 
 	m_notebook = new wxNotebook(this, wxID_ANY);
 	wxPanel* panel = new wxPanel(m_notebook);  // Timer tab
@@ -112,10 +112,14 @@ MainFrame::~MainFrame()
 
 std::string GetActiveWindowTitle() {
 	HWND hwnd = GetForegroundWindow();
-	if (!hwnd) return "";
+	if (!hwnd) {
+		//std::cout << "No foreground window\n";
+		return "";
+	}
 
 	char title[256];
 	int length = GetWindowTextA(hwnd, title, sizeof(title));
+	//std::cout << "[DEBUG] hwnd: " << hwnd << ", length: " << length << ", title: '" << title << "'\n";
 	if (length > 0) {
 		return std::string(title, length);
 	}
@@ -231,15 +235,39 @@ void MainFrame::OnTimer(wxTimerEvent& evt) {
 
 	UpdateDisplay();
 
-	if (m_windowLogger && m_isRunning) {
+	/*if (m_windowLogger && m_isRunning) {
 		static std::string lastTitle;
 		std::string title = GetActiveWindowTitle();
-		if (!title.empty() && title != lastTitle) {
-			if (title.find("TimeKeeper") != std::string::npos) {
+		if (!title.empty() && title != lastTitle && title.length() > 1) {
+			if (title.find("TimeKeeper") == std::string::npos) {
 				m_windowLogger->LogWindowChange(title);
 				lastTitle = title;
 			}
 		}
+	}*/
+	if (m_windowLogger && m_isRunning) {
+		HWND hwnd = GetForegroundWindow();
+
+		if (!IsWindowVisible(hwnd)) return;  // Skip invisible windows
+
+		char title[256];
+		int len = GetWindowTextA(hwnd, title, sizeof(title));
+		std::string currentTitle = len > 0 ? std::string(title, len) : "";
+
+		static std::string lastTitle;
+
+		// Skip if title is empty or same as before
+		if (currentTitle.empty() || currentTitle == lastTitle)
+			return;
+
+		// Skip your own window
+		if (currentTitle.find("TimeKeeper") != std::string::npos)
+			return;
+
+		std::cout << "LOGGING: " << currentTitle << std::endl;
+
+		m_windowLogger->LogWindowChange(currentTitle);
+		lastTitle = currentTitle;
 	}
 }
 

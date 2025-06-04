@@ -34,7 +34,7 @@ void WindowLogger::initDatabase() {
 }
 
 void WindowLogger::LogWindowChange(const std::string& newTitle) {
-    std::cout << "LogWindowChange called with: " << newTitle << "\n";
+    //std::cout << "LogWindowChange called with: " << newTitle << "\n";
 
     auto now = std::chrono::system_clock::now();
     if (!currentTitle.empty()) {
@@ -72,9 +72,11 @@ void WindowLogger::insertLog(const std::string& title, const std::string& startT
         sqlite3_step(stmt);
         sqlite3_finalize(stmt);
     }
+
     else {
         std::cerr << "Failed to prepare statement\n";
     }
+
 }
 
 std::string WindowLogger::getCurrentTimeString() {
