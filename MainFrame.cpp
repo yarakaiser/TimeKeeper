@@ -33,7 +33,6 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	m_startButton = new wxButton(panel, ID_START_BUTTON, "Start");
 	m_resetButton = new wxButton(panel, ID_RESET_BUTTON, "Reset");
-	//m_saveButton = new wxButton(panel, ID_SAVE_BUTTON, "Save");
 
 	//Bind buttons to events
 	m_startButton->Bind(wxEVT_BUTTON, &MainFrame::OnStart, this);
@@ -42,7 +41,6 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 	
 	buttonSizer->Add(m_startButton, 0, wxALL, 5);
 	buttonSizer->Add(m_resetButton, 0, wxALL, 5);
-	//buttonSizer->Add(m_saveButton, 0, wxALL, 5);
 
 	// Layout zusammenbauen
 	mainSizer->AddStretchSpacer();
@@ -76,8 +74,14 @@ MainFrame::MainFrame(const wxString& title): wxFrame(nullptr, wxID_ANY, title)
 
 	// Date picker
 	m_datePicker = new wxDatePickerCtrl(m_logPanel, wxID_ANY);
-	logSizer->Add(m_datePicker, 0, wxALL | wxEXPAND, 10);
+	wxBoxSizer* topBarSizer = new wxBoxSizer(wxHORIZONTAL);
+	m_refresh = new wxButton(m_logPanel, wxID_ANY, "Refresh");
+	m_refresh->Bind(wxEVT_BUTTON, &MainFrame::OnRefresh, this);
+	topBarSizer->Add(m_datePicker, 1, wxALL | wxEXPAND, 5);
+	topBarSizer->Add(m_refresh, 0, wxALL, 5);
+	logSizer->Add(topBarSizer, 0, wxEXPAND | wxALL, 5);
 	m_datePicker->Bind(wxEVT_DATE_CHANGED, &MainFrame::OnDateChanged, this);
+	
 
 	// List view
 	m_logList = new wxListCtrl(m_logPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
@@ -122,6 +126,13 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 {
 	wxDateTime selectedDate = event.GetDate();
 	wxString dateStr = selectedDate.FormatISODate(); // "YYYY-MM-DD"
+	LoadLogsForDate(dateStr);
+}
+
+void MainFrame::OnRefresh(wxCommandEvent& event)
+{
+	wxDateTime selectedDate = m_datePicker->GetValue();
+	wxString dateStr = selectedDate.FormatISODate();
 	LoadLogsForDate(dateStr);
 }
 
@@ -174,7 +185,7 @@ void MainFrame::OnStart(wxCommandEvent& evt) {
 		//Log the initial active window immediately
 		if (m_windowLogger) {
 			std::string title = GetActiveWindowTitle();
-			std::cout << "Active window title: " << title << std::endl;
+			//std::cout << "Active window title: " << title << std::endl;
 			if (!title.empty()) {
 				m_windowLogger->LogWindowChange(title);
 			}
@@ -196,6 +207,8 @@ void MainFrame::OnReset(wxCommandEvent& evt) {
 	m_seconds = 0;
 	UpdateDisplay();
 }
+
+
 
 //void MainFrame::OnSave(wxCommandEvent& evt) {
 //	// Hier könnte der Code zum Speichern der Zeit in einer Datenbank stehen
@@ -222,8 +235,10 @@ void MainFrame::OnTimer(wxTimerEvent& evt) {
 		static std::string lastTitle;
 		std::string title = GetActiveWindowTitle();
 		if (!title.empty() && title != lastTitle) {
-			m_windowLogger->LogWindowChange(title);
-			lastTitle = title;
+			if (title.find("TimeKeeper") != std::string::npos) {
+				m_windowLogger->LogWindowChange(title);
+				lastTitle = title;
+			}
 		}
 	}
 }

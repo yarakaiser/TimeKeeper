@@ -22,9 +22,9 @@ public:
 private:
     wxStaticText* m_timeDisplay;
     wxButton* m_startButton;
-	wxButton* m_stopButton;
+	//wxButton* m_stopButton;
 	wxButton* m_resetButton;
-	//wxButton* m_saveButton;
+    wxButton* m_refresh;
     wxTimer* m_timer;
     WindowLogger* m_windowLogger;
 
@@ -47,7 +47,7 @@ private:
 
     void OnStart(wxCommandEvent& event);
 	void OnReset(wxCommandEvent& event);
-	//void OnSave(wxCommandEvent& event);
+    void OnRefresh(wxCommandEvent& event);
     void OnTimer(wxTimerEvent& event);
     void UpdateDisplay();
     
