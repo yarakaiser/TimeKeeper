@@ -135,7 +135,6 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="sqlite3.c" />
-    <ClCompile Include="TimeKeeper.cpp" />
     <ClCompile Include="WindowLogger.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TimeKeeper.cpp">
-      <Filter>Ressourcendateien</Filter>
-    </ClCompile>
     <ClCompile Include="MainFrame.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
