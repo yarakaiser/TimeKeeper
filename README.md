@@ -5,7 +5,8 @@ Needs to be started as admin to properly track all applications.
 
 To build:  
 mkdir build  
-cd build  
+cmake -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 
-For Visual Studio:  
-cmake .. -G "Visual Studio 17 2022" -A x64
+To start:
+build\Timekeeper.exe
