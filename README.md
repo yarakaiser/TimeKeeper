@@ -8,5 +8,5 @@ mkdir build
 cmake -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 
-To start:
+To start:  
 build\Timekeeper.exe
