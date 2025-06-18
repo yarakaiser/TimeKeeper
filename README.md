@@ -9,3 +9,6 @@ cd build
 
 For Visual Studio:  
 cmake .. -G "Visual Studio 17 2022" -A x64
+
+![Timer](./Screenshot%20(111).png)
+![Logger](./Screenshot%20(112).png)
